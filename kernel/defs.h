@@ -8,6 +8,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct cond_t;
 
 // bio.c
 void            binit(void);
@@ -110,6 +111,8 @@ int		ps(void);
 int		pinfo(int, uint64);
 int		forkp(int);
 int		schedpolicy(int);
+void    condsleep(struct cond_t*, struct sleeplock*);
+void    wakeupone(struct cond_t*);
 
 // swtch.S
 void            swtch(struct context*, struct context*);
