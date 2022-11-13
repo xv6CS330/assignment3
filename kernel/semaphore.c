@@ -16,7 +16,7 @@ void sem_init (struct semaphore *s, int x){
 };
 void sem_wait (struct semaphore *s){
     acquiresleep(&(s->lock));
-    while(s->value>=0){
+    while(s->value==0){
         cond_wait(&(s->cv), &(s->lock));
     }
     s->value--;
