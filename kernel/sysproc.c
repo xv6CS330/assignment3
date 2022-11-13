@@ -6,6 +6,11 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "sleeplock.h"
+#include "condvar.h"
+#include "bar.h"
+
+struct barr barrier_arr[10];
 
 uint64
 sys_exit(void)
@@ -182,7 +187,6 @@ sys_schedpolicy(void)
   return schedpolicy(x);
 }
 
-
 uint64
 sys_barrier_alloc(void)
 {
@@ -190,9 +194,47 @@ sys_barrier_alloc(void)
   {
     if(barrier_arr[i].count == -1){
       barrier_arr[i].count = 0;
+      initsleeplock(&(barrier_arr[i].barr_lock), "barrier_lock");
+      (barrier_arr[i].cv).cond = 0;
       return i;
     }
   }
 
   return -1;
+}
+
+uint64
+sys_barrier(void)
+{
+  int barr_inst_no, barr_id, proc_nu;
+  if(argint(0, &barr_inst_no) < 0) return -1;
+  if(argint(1, &barr_id) < 0) return -1;
+  if(argint(2, &proc_nu) < 0) return -1;
+
+  acquiresleep(&(barrier_arr[barr_id].barr_lock));
+
+  printf("%d: Entered barrier#%d for barrier array id %d\n", myproc()->pid, barr_inst_no, barr_id);
+
+  barrier_arr[barr_id].count++;
+  if(barrier_arr[barr_id].count == proc_nu){
+    barrier_arr[barr_id].count = 0;
+    cond_broadcast(&(barrier_arr[barr_id].cv));
+  }
+  else cond_wait(&(barrier_arr[barr_id].cv), &(barrier_arr[barr_id].barr_lock));
+
+  printf("%d: Finished barrier#%d for barrier array id %d\n", myproc()->pid, barr_inst_no, barr_id);
+
+  releasesleep(&(barrier_arr[barr_id].barr_lock));
+
+  return 1;
+}
+
+uint64
+sys_barrier_free(void)
+{
+  int i;
+  if(argint(0, &i) < 0) return -1;
+
+  barrier_arr[i].count = -1;
+  return 1;
 }

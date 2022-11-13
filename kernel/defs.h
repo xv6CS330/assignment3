@@ -115,6 +115,12 @@ int		schedpolicy(int);
 void    condsleep(struct cond_t*, struct sleeplock*);
 void    wakeupone(struct cond_t*);
 
+//condvar.h
+void    cond_wait (struct cond_t *cv, struct sleeplock *lock);
+void    cond_signal (struct cond_t *cv);
+void    cond_broadcast (struct cond_t *cv);
+
+
 // swtch.S
 void            swtch(struct context*, struct context*);
 

@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 #include "procstat.h"
+#include "sleeplock.h"
 #include "condvar.h"
 
 int sched_policy;
