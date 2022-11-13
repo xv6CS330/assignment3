@@ -121,9 +121,9 @@ void    cond_signal (struct cond_t *cv);
 void    cond_broadcast (struct cond_t *cv);
 
 //semaphore.h
-void    sem_init (struct semaphore *s, int x);
-void    sem_wait (struct semaphore *s);
-void    sem_post (struct semaphore *s);
+// void    sem_init (struct semaphore *s, int x);
+// void    sem_wait (struct semaphore *s);
+// void    sem_post (struct semaphore *s);
 
 
 // swtch.S

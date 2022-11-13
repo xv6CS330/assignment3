@@ -11,6 +11,12 @@
 #include "bar.h"
 
 struct barr barrier_arr[10];
+struct buff buff_arr[20];
+int tail = 0;
+int head = 0;
+struct sleeplock lock_delete;
+struct sleeplock lock_insert;
+struct sleeplock lock_print;
 
 uint64
 sys_exit(void)
@@ -236,5 +242,70 @@ sys_barrier_free(void)
   if(argint(0, &i) < 0) return -1;
 
   barrier_arr[i].count = -1;
+  return 1;
+}
+
+uint64
+sys_buffer_cond_init(void)
+{ 
+  initsleeplock(&(lock_delete),"del");
+  initsleeplock(&(lock_insert),"ins");
+  initsleeplock(&(lock_print),"pri");
+  for(int i = 0; i < 20; i++)
+  {
+    buff_arr[i].x = -1;
+    buff_arr[i].full = 0;
+    initsleeplock(&(buff_arr[i].buff_lock),"buff_lock");
+    buff_arr[i].inserted.cond = 0;
+    buff_arr[i].deleted.cond = 0;
+  }
+  return 1;
+}
+
+uint64
+sys_cond_produce(void)
+{
+  int prod;
+  int index_prod;
+  if(argint(0, &prod) < 0) return -1;
+
+  acquiresleep(&(lock_insert));
+  index_prod = tail;
+  tail=(tail+1)%20;
+  releasesleep(&lock_insert);
+  acquiresleep(&(buff_arr[index_prod].buff_lock));
+  while(buff_arr[index_prod].full)
+  {
+    cond_wait(&(buff_arr[index_prod].deleted), &(buff_arr[index_prod].buff_lock));
+  }
+  buff_arr[index_prod].x = prod;
+  buff_arr[index_prod].full = 1;
+  cond_signal(&(buff_arr[index_prod].inserted));
+  releasesleep(&(buff_arr[index_prod].buff_lock));
+
+  return 1;
+}
+
+uint64
+sys_cond_consume(void)
+{
+  int index_cons,v;
+  acquiresleep(&(lock_delete));
+  index_cons = head;
+  head = (head+1)%20;
+  releasesleep(&(lock_delete));
+  acquiresleep(&(buff_arr[index_cons].buff_lock));
+  while(!buff_arr[index_cons].full)
+  {
+    cond_wait(&(buff_arr[index_cons].inserted), &(buff_arr[index_cons].buff_lock));
+  }
+  v = buff_arr[index_cons].x;
+  buff_arr[index_cons].full = 0;
+  cond_signal(&(buff_arr[index_cons].deleted));
+  releasesleep(&(buff_arr[index_cons].buff_lock));
+  acquiresleep(&(lock_print));
+  printf("%d ",v);
+  releasesleep(&(lock_print));
+
   return 1;
 }
