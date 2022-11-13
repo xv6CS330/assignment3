@@ -181,3 +181,18 @@ sys_schedpolicy(void)
   if(argint(0, &x) < 0) return -1;
   return schedpolicy(x);
 }
+
+
+uint64
+sys_barrier_alloc(void)
+{
+  for(int i = 0; i < 10; i++)
+  {
+    if(barrier_arr[i].count == -1){
+      barrier_arr[i].count = 0;
+      return i;
+    }
+  }
+
+  return -1;
+}

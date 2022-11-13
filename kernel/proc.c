@@ -1243,6 +1243,7 @@ wakeupone(struct cond_t *chan)
       acquire(&p->lock);
       if(p->state == SLEEPING && p->chan == chan) {
         p->state = RUNNABLE;
+        release(&p->lock);
         break;
       }
       release(&p->lock);
