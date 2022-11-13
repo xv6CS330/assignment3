@@ -15,5 +15,5 @@ void cond_signal (struct cond_t *cv){
     wakeupone(cv);
 };
 void cond_broadcast (struct cond_t *cv){
-    for(int i=0; i<4; i++)wakeupone(cv);
+    wakeup(cv);
 };
