@@ -16,4 +16,6 @@ void cond_wait (struct cond_t *cv, struct sleeplock *lock){
 void cond_signal (struct cond_t *cv){
     wakeupone(cv);
 };
-void cond_broadcast (struct cond_t *cv);
+void cond_broadcast (struct cond_t *cv){
+    wakeup(cv);
+};
