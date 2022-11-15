@@ -15,7 +15,6 @@ main(int argc, char *argv[])
   r = atoi(argv[2]);
   barrier_id = barrier_alloc();
   fprintf(1, "%d: got barrier array id %d\n\n", getpid(), barrier_id);
-   printf("%dyo\n",n);
   for (i=0; i<n-1; i++) {
      if (fork() == 0) {
         for (j=0; j<r; j++) {

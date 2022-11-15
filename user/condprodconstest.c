@@ -22,7 +22,7 @@ main(int argc, char *argv[])
   num_prods = atoi(argv[2]);
   num_cons = atoi(argv[3]);
   buffer_cond_init();
-
+  int startTime = uptime();
   printf("Start time: %d\n\n", uptime());
   for (i=0; i<num_prods; i++) {
      if (fork() == 0) {
@@ -39,5 +39,6 @@ main(int argc, char *argv[])
   for (j=0; j<(num_items*num_prods)/num_cons; j++) cond_consume();
   for (i=0; i<num_prods+num_cons-1; i++) wait(0);
   printf("\n\nEnd time: %d\n", uptime());
+  printf("Total time: %d\n", uptime()-startTime);
   exit(0);
 }
